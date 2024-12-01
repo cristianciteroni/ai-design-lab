@@ -1,65 +1,85 @@
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="AI Design Lab - Test API", layout="wide")
+# Configura il layout della pagina
+st.set_page_config(page_title="AI Design Lab", layout="wide")
 
-# Navbar
+# Stile personalizzato
+st.markdown("""
+    <style>
+    .css-18e3th9 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+    .stButton button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .stButton button:hover {
+        background-color: #45a049;
+    }
+    .stSlider > div {
+        background-color: #1e1e1e;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Navbar con tab
 tabs = st.tabs(["Genera Design", "Condivisione via Email"])
 
+# Tab: Genera Design
 with tabs[0]:
-    st.title("AI Design Lab - Generazione di Design (Test)")
-    st.subheader("Crea il tuo design con immagini casuali")
+    st.title("🎨 AI Design Lab - Generazione di Design")
+    st.write("Crea il tuo design con pochi click usando l'intelligenza artificiale!")
 
-    # Input per il prompt
-    prompt = st.text_input("Inserisci il tuo prompt", "Logo minimalista blu e bianco")
+    # Prompt e opzioni
+    col1, col2 = st.columns(2)
+    with col1:
+        prompt = st.text_input("Inserisci il tuo prompt:", "Logo minimalista blu e bianco")
+        style = st.selectbox("Seleziona lo stile:", ["Minimalista", "Astratto", "Vintage", "Moderno", "Futuristico"])
+    with col2:
+        primary_color = st.color_picker("Scegli un colore:", "#0000FF")
+        complexity = st.slider("Livello di complessità:", 1, 10, 5)
 
-    # Slider per il numero di design
-    num_variants = st.slider("Seleziona il numero di design", 1, 5, 3)
-
-    # Slider per il livello di complessità
-    complexity = st.slider("Seleziona il livello di complessità", 1, 10, 5)
-
-    # Palette di colori
-    primary_color = st.color_picker("Seleziona un colore principale", "#0000FF")
-
-    # Stile
-    style = st.selectbox("Seleziona lo stile", ["Minimalista", "Astratto", "Vintage", "Moderno", "Futuristico"])
+    # Numero di design
+    num_variants = st.slider("Numero di design:", 1, 5, 3)
 
     # Pulsante per generare
-    if st.button("Genera"):
+    if st.button("Genera Design"):
         with st.spinner("Generazione in corso..."):
             results = []
             for _ in range(num_variants):
-                # Usa l'API di Lorem Picsum per immagini casuali
-                response = requests.get("https://picsum.photos/500")
+                response = requests.get("https://source.unsplash.com/random/300x300/?design")
                 if response.status_code == 200:
                     results.append(response.url)
                 else:
-                    st.error(f"Errore durante la generazione delle immagini: {response.status_code}")
+                    results.append(None)
 
-            # Mostra i risultati
-            st.subheader("Galleria dei design generati")
-            for idx, url in enumerate(results, start=1):
-                st.image(url, caption=f"Design #{idx}")
-                st.download_button(
-                    label=f"Scarica Design #{idx}",
-                    data=requests.get(url).content,
-                    file_name=f"design_{idx}.png",
-                    mime="image/png"
-                )
+            # Mostra i risultati in griglia
+            st.subheader("Galleria dei design generati:")
+            cols = st.columns(3)
+            for idx, url in enumerate(results):
+                if url:
+                    with cols[idx % 3]:
+                        st.image(url, caption=f"Design #{idx + 1}")
+                        st.download_button("Scarica", requests.get(url).content, f"design_{idx + 1}.png")
+                else:
+                    st.error("Errore durante la generazione dell'immagine.")
 
+# Tab: Condivisione via Email
 with tabs[1]:
-    st.title("Condivisione via Email")
-    st.subheader("Invia i tuoi design via email")
+    st.title("📧 Condivisione via Email")
+    st.write("Invia i tuoi design generati ai tuoi colleghi o clienti!")
 
-    # Form email
-    receiver_email = st.text_input("Inserisci l'email del destinatario")
-    subject = st.text_input("Inserisci l'oggetto dell'email", "Ecco i tuoi design generati!")
-    message = st.text_area("Inserisci il messaggio", "Ciao, ecco i tuoi design generati con AI Design Lab!")
+    receiver_email = st.text_input("Email del destinatario:", "")
+    subject = st.text_input("Oggetto dell'email:", "I tuoi design generati!")
+    message = st.text_area("Messaggio:", "Ciao, ecco i tuoi design generati!")
 
-    # Pulsante per invio email
-    if st.button("Genera e Invia via Email"):
-        if receiver_email and "@" in receiver_email:
-            st.success(f"Email inviata con successo a {receiver_email}!")
+    if st.button("Invia Email"):
+        if "@" in receiver_email:
+            st.success("Email inviata con successo!")
         else:
-            st.error("Inserisci un'email valida.")
+            st.error("Per favore, inserisci un'email valida.")
