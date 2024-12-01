@@ -8,17 +8,11 @@ st.set_page_config(page_title="AI Design Lab", layout="wide")
 st.markdown("""
     <style>
     body {
-        background-color: #f7f9fc; /* Sfondo chiaro e accogliente */
+        background-color: #f0f0f5; /* Sfondo chiaro con sfumature morbide */
         color: #333;
     }
-    .css-18e3th9 {
-        background-color: #ffffff !important;  /* Colore di sfondo dei riquadri */
-    }
-    .css-1aumxhk {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
     .stButton>button {
-        background-color: #4CAF50; 
+        background-color: #4CAF50;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -43,15 +37,19 @@ st.markdown("""
     .stTabs>div>div {
         padding: 20px;
     }
-    /* Icone aggiunte */
-    .stTextInput svg {
+    .stTextInput svg, .stSelectbox svg {
         width: 1.5em;
         height: 1.5em;
-        margin-left: 10px;
     }
-    .stSelectbox svg {
-        width: 1.5em;
-        height: 1.5em;
+    .stTextInput {
+        margin-bottom: 20px;
+    }
+    .stSelectbox, .stSlider {
+        margin-bottom: 20px;
+    }
+    .stTextInput>div>div>div {
+        display: flex;
+        align-items: center;
     }
     </style>
 """, unsafe_allow_html=True)
