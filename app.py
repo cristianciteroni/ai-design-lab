@@ -1,15 +1,14 @@
 import streamlit as st
-import requests  # Importa la libreria requests
-import base64
+import requests
 
-st.set_page_config(page_title="AI Design Lab", layout="wide")
+st.set_page_config(page_title="AI Design Lab - Test API", layout="wide")
 
 # Navbar
 tabs = st.tabs(["Genera Design", "Condivisione via Email"])
 
 with tabs[0]:
-    st.title("AI Design Lab - Generazione di Design")
-    st.subheader("Crea il tuo design con l'intelligenza artificiale")
+    st.title("AI Design Lab - Generazione di Design (Test)")
+    st.subheader("Crea il tuo design con immagini casuali")
 
     # Input per il prompt
     prompt = st.text_input("Inserisci il tuo prompt", "Logo minimalista blu e bianco")
@@ -31,16 +30,12 @@ with tabs[0]:
         with st.spinner("Generazione in corso..."):
             results = []
             for _ in range(num_variants):
-                try:
-                    # Usa immagini casuali da Unsplash
-                    response = requests.get("https://source.unsplash.com/500x500/?design,art")
-                    if response.status_code == 200:
-                        results.append(response.url)
-                    else:
-                        raise Exception("Errore nell'API")
-                except Exception as e:
-                    st.error(f"Errore durante la generazione delle immagini: {e}")
-                    results.append("https://via.placeholder.com/500?text=Errore+di+Generazione")
+                # Usa l'API di Lorem Picsum per immagini casuali
+                response = requests.get("https://picsum.photos/500")
+                if response.status_code == 200:
+                    results.append(response.url)
+                else:
+                    st.error(f"Errore durante la generazione delle immagini: {response.status_code}")
 
             # Mostra i risultati
             st.subheader("Galleria dei design generati")
