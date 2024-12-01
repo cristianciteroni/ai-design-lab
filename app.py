@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 
 st.set_page_config(page_title="AI Design Lab", layout="wide")
 
@@ -30,30 +29,23 @@ with tabs[0]:
         with st.spinner("Generazione in corso..."):
             results = []
             for _ in range(num_variants):
-                # Simulazione di una richiesta API
-                response = requests.get("https://source.unsplash.com/500x500/?design,art")
-                if response.status_code == 200:
-                    st.write(f"Immagine generata con URL: {response.url}")
-                    results.append(response.url)
-                else:
-                    st.error(f"Errore nella richiesta all'API: {response.status_code}")
-            
-            if results:
-                # Mostra i risultati
-                st.subheader("Galleria dei design generati")
-                for idx, url in enumerate(results, start=1):
-                    try:
-                        st.image(url, caption=f"Design #{idx}")
-                        st.download_button(
-                            label=f"Scarica Design #{idx}",
-                            data=requests.get(url).content,
-                            file_name=f"design_{idx}.png",
-                            mime="image/png"
-                        )
-                    except Exception as e:
-                        st.error(f"Errore nel caricamento dell'immagine: {e}")
-            else:
-                st.warning("Nessuna immagine generata. Controlla la connessione o l'API.")
+                try:
+                    # URL placeholder per immagini di esempio
+                    placeholder_url = f"https://via.placeholder.com/500?text={prompt}+{style}+{primary_color}"
+                    results.append(placeholder_url)
+                except Exception as e:
+                    st.error(f"Errore durante la generazione delle immagini: {e}")
+
+            # Mostra i risultati
+            st.subheader("Galleria dei design generati")
+            for idx, url in enumerate(results, start=1):
+                st.image(url, caption=f"Design #{idx}")
+                st.download_button(
+                    label=f"Scarica Design #{idx}",
+                    data=f"Placeholder per {prompt}".encode(),
+                    file_name=f"design_{idx}.txt",
+                    mime="text/plain"
+                )
 
 with tabs[1]:
     st.title("Condivisione via Email")
