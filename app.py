@@ -1,85 +1,105 @@
 import streamlit as st
 import requests
 
-# Configura il layout della pagina
+# Impostazioni della pagina
 st.set_page_config(page_title="AI Design Lab", layout="wide")
 
-# Stile personalizzato
+# Aggiornamento del tema
 st.markdown("""
     <style>
-    .css-18e3th9 {
-        padding-top: 3rem;
-        padding-bottom: 3rem;
+    body {
+        background-color: #f4f7f6; /* Sfondo chiaro */
+        color: #333;
     }
-    .stButton button {
-        background-color: #4CAF50;
+    .css-18e3th9 {
+        background-color: #ffffff !important;  /* Colore di sfondo dei riquadri */
+    }
+    .css-1aumxhk {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .stButton>button {
+        background-color: #4CAF50; 
         color: white;
-        border-radius: 5px;
+        border: none;
         padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
         font-size: 16px;
     }
-    .stButton button:hover {
+    .stButton>button:hover {
         background-color: #45a049;
     }
-    .stSlider > div {
-        background-color: #1e1e1e;
+    .stTextInput>label {
+        color: #555;
+        font-size: 14px;
+    }
+    .stSelectbox>label {
+        color: #555;
+        font-size: 14px;
+    }
+    .stSlider {
+        margin-top: 10px;
     }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# Navbar con tab
+# Navbar
 tabs = st.tabs(["Genera Design", "Condivisione via Email"])
 
-# Tab: Genera Design
+# Sezione Genera Design
 with tabs[0]:
-    st.title("🎨 AI Design Lab - Generazione di Design")
-    st.write("Crea il tuo design con pochi click usando l'intelligenza artificiale!")
+    st.title("AI Design Lab - Generazione di Design")
+    st.subheader("Crea il tuo design con l'intelligenza artificiale in pochi click!")
 
-    # Prompt e opzioni
-    col1, col2 = st.columns(2)
-    with col1:
-        prompt = st.text_input("Inserisci il tuo prompt:", "Logo minimalista blu e bianco")
-        style = st.selectbox("Seleziona lo stile:", ["Minimalista", "Astratto", "Vintage", "Moderno", "Futuristico"])
-    with col2:
-        primary_color = st.color_picker("Scegli un colore:", "#0000FF")
-        complexity = st.slider("Livello di complessità:", 1, 10, 5)
+    # Input per il prompt
+    prompt = st.text_input("Inserisci il tuo prompt", "Logo minimalista blu e bianco")
 
-    # Numero di design
-    num_variants = st.slider("Numero di design:", 1, 5, 3)
+    # Slider per il numero di design
+    num_variants = st.slider("Numero di design:", 1, 5, 1)
+
+    # Slider per il livello di complessità
+    complexity = st.slider("Livello di complessità:", 1, 10, 5)
+
+    # Palette di colori
+    primary_color = st.color_picker("Scegli un colore:", "#0000FF")
+
+    # Stile
+    style = st.selectbox("Seleziona lo stile:", ["Minimalista", "Astratto", "Vintage", "Moderno", "Futuristico"])
 
     # Pulsante per generare
     if st.button("Genera Design"):
         with st.spinner("Generazione in corso..."):
             results = []
             for _ in range(num_variants):
-                response = requests.get("https://source.unsplash.com/random/300x300/?design")
+                # Simulazione di una richiesta API
+                response = requests.get(f"https://source.unsplash.com/500x500/?{prompt}")
                 if response.status_code == 200:
                     results.append(response.url)
-                else:
-                    results.append(None)
 
-            # Mostra i risultati in griglia
-            st.subheader("Galleria dei design generati:")
-            cols = st.columns(3)
-            for idx, url in enumerate(results):
-                if url:
-                    with cols[idx % 3]:
-                        st.image(url, caption=f"Design #{idx + 1}")
-                        st.download_button("Scarica", requests.get(url).content, f"design_{idx + 1}.png")
-                else:
-                    st.error("Errore durante la generazione dell'immagine.")
+            # Mostra i risultati
+            st.subheader("Galleria dei design generati")
+            for idx, url in enumerate(results, start=1):
+                st.image(url, caption=f"{prompt} - {style}")
+                st.download_button(
+                    label=f"Scarica Design #{idx}",
+                    data=requests.get(url).content,
+                    file_name=f"design_{idx}.png",
+                    mime="image/png"
+                )
 
-# Tab: Condivisione via Email
+# Sezione Condivisione via Email
 with tabs[1]:
-    st.title("📧 Condivisione via Email")
-    st.write("Invia i tuoi design generati ai tuoi colleghi o clienti!")
+    st.title("Condivisione via Email")
+    st.subheader("Invia i tuoi design generati ai tuoi colleghi o clienti!")
 
-    receiver_email = st.text_input("Email del destinatario:", "")
-    subject = st.text_input("Oggetto dell'email:", "I tuoi design generati!")
-    message = st.text_area("Messaggio:", "Ciao, ecco i tuoi design generati!")
+    # Form email
+    receiver_email = st.text_input("Email del destinatario")
+    subject = st.text_input("Oggetto dell'email", "I tuoi design generati!")
+    message = st.text_area("Messaggio", "Ciao, ecco i tuoi design generati!")
 
+    # Pulsante per invio email
     if st.button("Invia Email"):
-        if "@" in receiver_email:
-            st.success("Email inviata con successo!")
+        if receiver_email and "@" in receiver_email:
+            st.success(f"Email inviata con successo a {receiver_email}!")
         else:
-            st.error("Per favore, inserisci un'email valida.")
+            st.error("Inserisci un'email valida.")
