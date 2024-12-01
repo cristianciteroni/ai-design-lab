@@ -30,11 +30,15 @@ with tabs[0]:
             results = []
             for _ in range(num_variants):
                 try:
-                    # URL placeholder per immagini di esempio
-                    placeholder_url = f"https://via.placeholder.com/500?text={prompt}+{style}+{primary_color}"
-                    results.append(placeholder_url)
+                    # Usa immagini casuali da Unsplash
+                    response = requests.get("https://source.unsplash.com/500x500/?design,art")
+                    if response.status_code == 200:
+                        results.append(response.url)
+                    else:
+                        raise Exception("Errore nell'API")
                 except Exception as e:
                     st.error(f"Errore durante la generazione delle immagini: {e}")
+                    results.append("https://via.placeholder.com/500?text=Errore+di+Generazione")
 
             # Mostra i risultati
             st.subheader("Galleria dei design generati")
@@ -42,9 +46,9 @@ with tabs[0]:
                 st.image(url, caption=f"Design #{idx}")
                 st.download_button(
                     label=f"Scarica Design #{idx}",
-                    data=f"Placeholder per {prompt}".encode(),
-                    file_name=f"design_{idx}.txt",
-                    mime="text/plain"
+                    data=requests.get(url).content,
+                    file_name=f"design_{idx}.png",
+                    mime="image/png"
                 )
 
 with tabs[1]:
