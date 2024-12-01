@@ -1,7 +1,8 @@
 import streamlit as st
 import requests
-import base64
 import os
+import zipfile
+from io import BytesIO
 
 # Directory per salvare le immagini generate
 OUTPUT_DIR = "generated_designs"
@@ -22,6 +23,9 @@ complexity_level = st.slider("Seleziona il livello di complessità", 1, 10, 5)
 # Colore principale
 main_color = st.color_picker("Seleziona un colore principale", "#0000FF")
 
+# Formato immagine
+image_format = st.selectbox("Seleziona il formato immagine", ["PNG", "JPG"])
+
 # Pulsante per generare
 if st.button("Genera"):
     with st.spinner("Generazione in corso..."):
@@ -30,7 +34,8 @@ if st.button("Genera"):
             # Simulazione di una richiesta API
             response = requests.get("https://source.unsplash.com/500x500/?design,art")
             if response.status_code == 200:
-                image_path = os.path.join(OUTPUT_DIR, f"design_{idx + 1}.png")
+                file_ext = "jpg" if image_format == "JPG" else "png"
+                image_path = os.path.join(OUTPUT_DIR, f"design_{idx + 1}.{file_ext}")
                 with open(image_path, "wb") as f:
                     f.write(requests.get(response.url).content)
                 results.append(image_path)
@@ -42,9 +47,23 @@ if st.button("Genera"):
                 st.download_button(
                     label=f"Scarica Design #{idx}",
                     data=f.read(),
-                    file_name=f"design_{idx}.png",
-                    mime="image/png"
+                    file_name=os.path.basename(image_path),
+                    mime=f"image/{image_format.lower()}"
                 )
+
+        # Opzione per scaricare tutto in un file ZIP
+        if st.button("Scarica tutti i design in un file ZIP"):
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+                for image_path in results:
+                    zip_file.write(image_path, os.path.basename(image_path))
+            zip_buffer.seek(0)
+            st.download_button(
+                label="Scarica ZIP",
+                data=zip_buffer,
+                file_name="designs.zip",
+                mime="application/zip"
+            )
 
 # Divider
 st.markdown("---")
@@ -56,7 +75,7 @@ st.header("Galleria dei design generati")
 saved_images = [
     os.path.join(OUTPUT_DIR, img)
     for img in os.listdir(OUTPUT_DIR)
-    if img.endswith(".png")
+    if img.endswith(("png", "jpg"))
 ]
 if saved_images:
     for img_path in saved_images:
