@@ -1,72 +1,44 @@
 import streamlit as st
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-import os
 import requests
+import base64
 
-# Funzione per inviare email
-def send_email(receiver_email, subject, body, attachments):
-    sender_email = "tuoemail@gmail.com"  # Inserisci la tua email
-    sender_password = "tuapassword"     # Inserisci la tua password
+st.set_page_config(page_title="AI Design Lab", layout="wide")
 
-    msg = MIMEMultipart()
-    msg["From"] = sender_email
-    msg["To"] = receiver_email
-    msg["Subject"] = subject
+# Navbar
+tabs = st.tabs(["Genera Design", "Condivisione via Email"])
 
-    msg.attach(MIMEText(body, "plain"))
-
-    for attachment_path in attachments:
-        try:
-            with open(attachment_path, "rb") as attachment:
-                part = MIMEBase("application", "octet-stream")
-                part.set_payload(attachment.read())
-                encoders.encode_base64(part)
-                part.add_header(
-                    "Content-Disposition",
-                    f"attachment; filename={os.path.basename(attachment_path)}",
-                )
-                msg.attach(part)
-        except FileNotFoundError:
-            return f"Errore: file non trovato {attachment_path}"
-
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
-        return "Email inviata con successo!"
-    except Exception as e:
-        return f"Errore nell'invio dell'email: {str(e)}"
-
-# Layout con tab per separare le funzionalità
-tab1, tab2 = st.tabs(["Genera Design", "Condividi via Email"])
-
-# Tab per la generazione di design
-with tab1:
+with tabs[0]:
     st.title("AI Design Lab - Generazione di Design")
+    st.subheader("Crea il tuo design con l'intelligenza artificiale")
+
+    # Input per il prompt
     prompt = st.text_input("Inserisci il tuo prompt", "Logo minimalista blu e bianco")
+
+    # Slider per il numero di design
     num_variants = st.slider("Seleziona il numero di design", 1, 5, 3)
 
-    design_urls = []
-    design_paths = []
+    # Slider per il livello di complessità
+    complexity = st.slider("Seleziona il livello di complessità", 1, 10, 5)
 
+    # Palette di colori
+    primary_color = st.color_picker("Seleziona un colore principale", "#0000FF")
+
+    # Stile
+    style = st.selectbox("Seleziona lo stile", ["Minimalista", "Astratto", "Vintage", "Moderno", "Futuristico"])
+
+    # Pulsante per generare
     if st.button("Genera"):
         with st.spinner("Generazione in corso..."):
-            for i in range(num_variants):
+            results = []
+            for _ in range(num_variants):
+                # Simulazione di una richiesta API
                 response = requests.get("https://source.unsplash.com/500x500/?design,art")
                 if response.status_code == 200:
-                    file_path = f"design_{i+1}.png"
-                    with open(file_path, "wb") as f:
-                        f.write(response.content)
-                    design_urls.append(response.url)
-                    design_paths.append(file_path)
+                    results.append(response.url)
 
-            # Mostra i design generati
-            for idx, url in enumerate(design_urls, start=1):
+            # Mostra i risultati
+            st.subheader("Galleria dei design generati")
+            for idx, url in enumerate(results, start=1):
                 st.image(url, caption=f"Design #{idx}")
                 st.download_button(
                     label=f"Scarica Design #{idx}",
@@ -75,24 +47,18 @@ with tab1:
                     mime="image/png"
                 )
 
-# Tab per inviare i design via email
-with tab2:
+with tabs[1]:
     st.title("Condivisione via Email")
+    st.subheader("Invia i tuoi design via email")
+
+    # Form email
     receiver_email = st.text_input("Inserisci l'email del destinatario")
-    subject = st.text_input("Inserisci l'oggetto dell'email", "Il tuo design generato!")
-    body = st.text_area("Inserisci il messaggio", "Ecco i design che hai generato con AI Design Lab.")
+    subject = st.text_input("Inserisci l'oggetto dell'email", "Ecco i tuoi design generati!")
+    message = st.text_area("Inserisci il messaggio", "Ciao, ecco i tuoi design generati con AI Design Lab!")
 
+    # Pulsante per invio email
     if st.button("Genera e Invia via Email"):
-        if not design_paths:
-            st.error("Genera almeno un design prima di inviare un'email.")
-        elif not receiver_email:
-            st.error("Inserisci un'email valida.")
+        if receiver_email and "@" in receiver_email:
+            st.success(f"Email inviata con successo a {receiver_email}!")
         else:
-            with st.spinner("Invio in corso..."):
-                message = send_email(receiver_email, subject, body, design_paths)
-                st.success(message)
-
-        # Pulizia dei file locali
-        for path in design_paths:
-            if os.path.exists(path):
-                os.remove(path)
+            st.error("Inserisci un'email valida.")
