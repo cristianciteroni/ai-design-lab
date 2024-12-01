@@ -1,4 +1,6 @@
 import streamlit as st
+import requests  # Importa la libreria requests
+import base64
 
 st.set_page_config(page_title="AI Design Lab", layout="wide")
 
