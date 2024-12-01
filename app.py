@@ -8,7 +8,7 @@ st.set_page_config(page_title="AI Design Lab", layout="wide")
 st.markdown("""
     <style>
     body {
-        background-color: #f4f7f6; /* Sfondo chiaro */
+        background-color: #f7f9fc; /* Sfondo chiaro e accogliente */
         color: #333;
     }
     .css-18e3th9 {
@@ -39,6 +39,19 @@ st.markdown("""
     }
     .stSlider {
         margin-top: 10px;
+    }
+    .stTabs>div>div {
+        padding: 20px;
+    }
+    /* Icone aggiunte */
+    .stTextInput svg {
+        width: 1.5em;
+        height: 1.5em;
+        margin-left: 10px;
+    }
+    .stSelectbox svg {
+        width: 1.5em;
+        height: 1.5em;
     }
     </style>
 """, unsafe_allow_html=True)
