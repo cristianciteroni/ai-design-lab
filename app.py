@@ -52,14 +52,30 @@ receiver_email = st.text_input("Inserisci l'email del destinatario")
 subject = st.text_input("Inserisci l'oggetto dell'email", "Il tuo design generato!")
 body = st.text_area("Inserisci il messaggio", "Ecco i design che hai generato con AI Design Lab.")
 
-# Simula un design generato
-design_paths = ["design_1.png", "design_2.png"]  # Sostituire con i file effettivi generati
+# Genera i design e salva i file
+design_urls = []
+design_paths = []
+if st.button("Genera e Invia via Email"):
+    with st.spinner("Generazione in corso..."):
+        for i in range(2):  # Genera 2 design come esempio
+            response = requests.get("https://source.unsplash.com/500x500/?design,art")
+            if response.status_code == 200:
+                # Salva l'immagine
+                file_path = f"design_{i+1}.png"
+                with open(file_path, "wb") as f:
+                    f.write(response.content)
+                design_urls.append(response.url)
+                design_paths.append(file_path)
 
-# Pulsante per inviare l'email
-if st.button("Invia via Email"):
-    if receiver_email and design_paths:
-        with st.spinner("Invio in corso..."):
-            message = send_email(receiver_email, subject, body, design_paths)
-            st.success(message)
-    else:
-        st.error("Inserisci un'email valida e genera almeno un design.")
+        # Invio email
+        if receiver_email and design_paths:
+            with st.spinner("Invio in corso..."):
+                message = send_email(receiver_email, subject, body, design_paths)
+                st.success(message)
+        else:
+            st.error("Inserisci un'email valida e genera almeno un design.")
+
+# Pulizia dei file locali
+for path in design_paths:
+    if os.path.exists(path):
+        os.remove(path)
